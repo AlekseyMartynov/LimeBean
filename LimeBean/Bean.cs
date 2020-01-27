@@ -10,19 +10,18 @@ namespace LimeBean {
 
     [Serializable]
     public class Bean {
-        public const string ID_PROP_NAME = "id";
-
         static readonly ConcurrentDictionary<Type, string> _kindCache = new ConcurrentDictionary<Type, string>();
 
         internal static string GetKind<T>() where T : Bean, new() {
             return _kindCache.GetOrAdd(typeof(T), type => new T().GetKind());
         }
 
-        IDictionary<string, IConvertible> _props = new Dictionary<string, IConvertible>();
-        IDictionary<string, IConvertible> _dirtyBackup;
+        IDictionary<string, object> _props = new Dictionary<string, object>();
+        IDictionary<string, object> _dirtyBackup;
         string _kind;
 
         internal bool Dispensed;
+        internal BeanApi Api;
 
         internal Bean() {
         }
@@ -35,11 +34,11 @@ namespace LimeBean {
             return _kind;
         }
 
-        internal IConvertible GetKey(IKeyAccess access) {
+        internal object GetKey(IKeyAccess access) {
             return access.GetKey(_kind, _props);
         }
 
-        internal void SetKey(IKeyAccess access, IConvertible key) {
+        internal void SetKey(IKeyAccess access, object key) {
             access.SetKey(_kind, _props, key);
         }
 
@@ -49,7 +48,7 @@ namespace LimeBean {
 
         // Accessors
 
-        public IConvertible this[string name] {
+        public object this[string name] {
             get { return _props.GetSafe(name); }
             set {
                 SaveDirtyBackup(name, value);
@@ -57,61 +56,29 @@ namespace LimeBean {
             }
         }
 
-        public T Get<T>(string name) where T : IConvertible {
-            var value = GetCore(name, typeof(T));
-            if(value == null)
-                return default(T);
-
-            return (T)value;
+        public T Get<T>(string name) {
+            return this[name].ConvertSafe<T>();
         }
 
-        public T? GetNullable<T>(string name) where T : struct, IConvertible {
-            return (T?)GetCore(name, typeof(T));
-        }
-
-        object GetCore(string name, Type convertTo) {
-            var value = this[name];
-
-            if(value == null || value.GetTypeCode() == Type.GetTypeCode(convertTo))
-                return value;
-
-            try {
-                if(convertTo.IsEnum)
-                    return Enum.Parse(convertTo, value.ToString(CultureInfo.InvariantCulture), true);
-
-                return value.ToType(convertTo, CultureInfo.InvariantCulture);
-            } catch {
-                return null;
-            }
-        }
-
-        public Bean Put<T>(string name, T value) where T : IConvertible { 
+        public Bean Put(string name, object value) {
             this[name] = value;
-            return this;
-        }
-
-        public Bean Put<T>(string name, T? value) where T : struct, IConvertible {
-            if(value != null)
-                Put(name, value.Value);
-            else
-                this[name] = null;
             return this;
         }
 
         // Import / Export
 
-        internal IDictionary<string, IConvertible> Export() {
-            return new Dictionary<string, IConvertible>(_props);
+        internal IDictionary<string, object> Export() {
+            return new Dictionary<string, object>(_props);
         }
 
-        internal void Import(IDictionary<string, IConvertible> data) {
+        internal void Import(IDictionary<string, object> data) {
             foreach(var entry in data)
                 this[entry.Key] = entry.Value;
         }
 
         // Dirty tracking
 
-        void SaveDirtyBackup(string name, IConvertible newValue) {
+        void SaveDirtyBackup(string name, object newValue) {
             var currentValue = this[name];
             if(Equals(newValue, currentValue))
                 return;
@@ -125,7 +92,7 @@ namespace LimeBean {
                     _dirtyBackup.Remove(name);
             } else {
                 if(_dirtyBackup == null)
-                    _dirtyBackup = new Dictionary<string, IConvertible>();
+                    _dirtyBackup = new Dictionary<string, object>();
                 _dirtyBackup[name] = currentValue;
             }
         }
@@ -142,6 +109,10 @@ namespace LimeBean {
         }
 
         // Hooks
+
+        protected BeanApi GetApi() {
+            return Api;
+        }
 
         protected internal virtual void AfterDispense() {
         }

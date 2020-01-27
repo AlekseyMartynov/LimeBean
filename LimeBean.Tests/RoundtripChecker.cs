@@ -1,8 +1,8 @@
-﻿using NUnit.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Xunit;
 
 namespace LimeBean.Tests {
 
@@ -15,17 +15,17 @@ namespace LimeBean.Tests {
             _storage = storage;
         }
 
-        public void Check(IConvertible before, IConvertible after) {            
-            var id = _storage.Store("foo", new Dictionary<string, IConvertible> { 
+        public void Check(object before, object after) {
+            var id = _storage.Store("foo", new Dictionary<string, object> { 
                     { "p", before }
                 });
 
             try {
                 var loaded = _storage.Load("foo", id);
-                Assert.AreEqual(after, loaded.GetSafe("p"));
+                Assert.Equal(after, loaded.GetSafe("p"));
 
                 if(after != null)
-                    Assert.AreEqual(after.GetType(), loaded["p"].GetType());
+                    Assert.Equal(after.GetType(), loaded["p"].GetType());
             } finally {
                 _db.Exec("drop table foo");
                 _storage.InvalidateSchema();            

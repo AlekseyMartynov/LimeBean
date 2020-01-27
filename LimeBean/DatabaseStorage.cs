@@ -69,68 +69,71 @@ namespace LimeBean {
             return GetSchema().ContainsKey(kind);
         }
 
-        IDictionary<string, int> GetColumnsFromData(IDictionary<string, IConvertible> data) {
+        IDictionary<string, int> GetColumnsFromData(IDictionary<string, object> data) {
             var result = new Dictionary<string, int>();
             foreach(var entry in data)
                 result[entry.Key] = _details.GetRankFromValue(entry.Value);
             return result;
         }
 
-        IConvertible ConvertValue(IConvertible value) {
+        object ConvertValue(object value) {
             if(value == null)
                 return null;
 
-            switch(value.GetTypeCode()) {
-                case TypeCode.Boolean:
-                case TypeCode.SByte:
-                case TypeCode.Byte:
-                case TypeCode.Int16:
-                case TypeCode.UInt16:
-                case TypeCode.Int32:
-                case TypeCode.UInt32:
-                case TypeCode.Int64:
-                    return _details.ConvertLongValue(value.ToInt64(CultureInfo.InvariantCulture));
+            if(value is UInt64) {
+                var number = (ulong)value;
+                value = number <= Int64.MaxValue ? (long)number : (decimal)number;
+            }                
 
-                case TypeCode.Single:
-                case TypeCode.Double:
-                    var number = value.ToDouble(CultureInfo.InvariantCulture);
+            if(value is Boolean) {
+                if(_details.SupportsBoolean)
+                    return value;
+                value = (bool)value ? 1 : 0;
+            } else if(value is Decimal) {
+                if(_details.SupportsDecimal)
+                    return value;
+                value = Convert.ToString(value, CultureInfo.InvariantCulture);
+            }
 
-                    if(RecognizeIntegers) {
-                        const double
-                            minSafeInteger = -0x1fffffffffffff,
-                            maxSafeInteger = 0x1fffffffffffff;
+            if(value is Int32 || value is Int64 || value is Byte || value is SByte || value is Int16 || value is UInt16 || value is UInt32 || value is Enum)
+                return _details.ConvertLongValue(Convert.ToInt64(value));
 
-                        if(Math.Truncate(number) == number && number >= minSafeInteger && number <= maxSafeInteger)
-                            return _details.ConvertLongValue(Convert.ToInt64(number));
+            if(value is Double || value is Single) {
+                var number = Convert.ToDouble(value);
+                if(RecognizeIntegers && number.IsSafeInteger())
+                    return _details.ConvertLongValue(Convert.ToInt64(number));
+
+                return number;        
+            }
+
+            if(value is String) {
+                var text = (string)value;
+
+                if(TrimStrings)
+                    text = text.Trim();
+
+                if(ConvertEmptyStringToNull && text.Length < 1)
+                    return null;
+
+                if(RecognizeIntegers && text.Length > 0 && text.Length < 21 && !Char.IsLetter(text, 0)) {
+                    long number;
+                    if(Int64.TryParse(text, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out number)) {
+                        if(number.ToString(CultureInfo.InvariantCulture) == text)
+                            return _details.ConvertLongValue(number);
                     }
-
-                    return number;
-            }
-
-            var text = value.ToString(CultureInfo.InvariantCulture);
-
-            if(TrimStrings)
-                text = text.Trim();
-
-            if(ConvertEmptyStringToNull && text.Length < 1)
-                return null;
-
-            if(RecognizeIntegers && text.Length > 0 && text.Length < 21 && !Char.IsLetter(text, 0)) {
-                long number;
-                if(Int64.TryParse(text, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out number)) {
-                    if(number.ToString(CultureInfo.InvariantCulture) == text)
-                        return _details.ConvertLongValue(number);
                 }
+
+                return text;
             }
 
-            return text;
+            return value;
         }
 
-        public IConvertible Store(string kind, IDictionary<string, IConvertible> data) {
+        public object Store(string kind, IDictionary<string, object> data) {
             return Store(kind, data, null);
         }
 
-        public IConvertible Store(string kind, IDictionary<string, IConvertible> data, ICollection<string> dirtyNames) {            
+        public object Store(string kind, IDictionary<string, object> data, ICollection<string> dirtyNames) {            
             var key = _keyAccess.GetKey(kind, data);
             var autoIncrement = _keyAccess.IsAutoIncrement(kind);
 
@@ -140,7 +143,7 @@ namespace LimeBean {
             var isNew = !autoIncrement ? !IsKnownKey(kind, key) : key == null;
 
             if(!isNew && key != null) {
-                data = new Dictionary<string, IConvertible>(data);
+                data = new Dictionary<string, object>(data);
                 _keyAccess.SetKey(kind, data, null);
             }
 
@@ -153,25 +156,18 @@ namespace LimeBean {
                 CheckSchema(kind, data);
             }
 
-            if(isNew)
-                ExecInsert(kind, data);
-            else if(data.Count > 0)
+            if(isNew) {
+                var insertResult = _details.ExecInsert(_db, kind, _keyAccess.GetAutoIncrementName(kind), data);
+                if(autoIncrement)
+                    return insertResult;
+            } else if(data.Count > 0) {
                 ExecUpdate(kind, key, data);
-
-            if(isNew && autoIncrement) {
-                // NOTE on concurrency
-                // "last insert id" is connection-aware, but not thread-safe
-                // http://stackoverflow.com/q/21185666
-                // http://stackoverflow.com/q/9313205
-                // http://www.sqlite.org/lang_corefunc.html
-
-                return _details.GetLastInsertID(_db);
             }
 
             return key;
         }
 
-        public IDictionary<string, IConvertible> Load(string kind, IConvertible key) {
+        public IDictionary<string, object> Load(string kind, object key) {
             if(_isFluidMode && !IsKnownKind(kind))
                 return null;
 
@@ -179,7 +175,7 @@ namespace LimeBean {
             return _db.Row(true, args.Item1, args.Item2);
         }
 
-        public void Trash(string kind, IConvertible key) {
+        public void Trash(string kind, object key) {
             if(_isFluidMode && !IsKnownKind(kind))
                 return;
 
@@ -187,7 +183,7 @@ namespace LimeBean {
             _db.Exec(args.Item1, args.Item2);
         }
 
-        bool IsKnownKey(string kind, IConvertible key) {
+        bool IsKnownKey(string kind, object key) {
             if(_isFluidMode && !IsKnownKind(kind))
                 return false;
 
@@ -195,29 +191,7 @@ namespace LimeBean {
             return _db.Cell<int>(false, args.Item1, args.Item2) > 0;
         }
 
-        void ExecInsert(string kind, IDictionary<string, IConvertible> data) {
-            var propNames = new string[data.Count];
-            var propValues = new object[data.Count];
-            var placeholders = new string[data.Count];
-
-            var index = 0;
-            foreach(var entry in data) {
-                propNames[index] = QuoteName(entry.Key);
-                propValues[index] = entry.Value;
-                placeholders[index] = "{" + index + "}";
-                index++;
-            }
-
-            var sql = "insert into " + QuoteName(kind) + " ";
-            if(data.Count > 0)
-                sql += "(" + String.Join(", ", propNames) + ") values (" + String.Join(", ", placeholders) + ")";
-            else
-                sql += _details.GetInsertDefaultsPostfix();
-
-            _db.Exec(sql, propValues);
-        }
-
-        void ExecUpdate(string kind, IConvertible key, IDictionary<string, IConvertible> data) {
+        void ExecUpdate(string kind, object key, IDictionary<string, object> data) {
             var propValues = new List<object>();
             var sql = new StringBuilder();
 
@@ -247,7 +221,7 @@ namespace LimeBean {
                 throw new Exception("Row not found");
         }
 
-        Tuple<string, object[]> CreateSimpleByKeyArguments(string prefix, string kind, IConvertible key) {
+        Tuple<string, object[]> CreateSimpleByKeyArguments(string prefix, string kind, object key) {
             var parameters = new List<object>();
             var sql = new StringBuilder(prefix)
                 .Append(" from ")
@@ -258,9 +232,9 @@ namespace LimeBean {
             return Tuple.Create(sql.ToString(), parameters.ToArray());
         }
 
-        IDictionary<string, IConvertible> DropNulls(string kind, IDictionary<string, IConvertible> data) {
+        IDictionary<string, object> DropNulls(string kind, IDictionary<string, object> data) {
             var schema = GetSchema();
-            var result = new Dictionary<string, IConvertible>();
+            var result = new Dictionary<string, object>();
 
             foreach(var entry in data) {
                 if(entry.Value != null || schema.ContainsKey(kind) && schema[kind].ContainsKey(entry.Key))                    
@@ -270,7 +244,7 @@ namespace LimeBean {
             return result;
         }
 
-        void CheckSchema(string kind, IDictionary<string, IConvertible> data) {
+        void CheckSchema(string kind, IDictionary<string, object> data) {
             var newColumns = GetColumnsFromData(data);
             var autoIncrementName = _keyAccess.GetAutoIncrementName(kind);
 
@@ -278,6 +252,8 @@ namespace LimeBean {
                 newColumns.Remove(autoIncrementName);
 
             if(!IsKnownKind(kind)) {
+                foreach(var name in newColumns.Keys)
+                    ValidateNewColumnRank(name, newColumns[name], data[name]);                
                 _db.Exec(CommonDatabaseDetails.FormatCreateTableCommand(_details, kind, autoIncrementName, newColumns));
                 InvalidateSchema();
             } else {
@@ -286,10 +262,16 @@ namespace LimeBean {
                 var addedColumns = new Dictionary<string, int>();
 
                 foreach(var name in newColumns.Keys) {
-                    if(!oldColumns.ContainsKey(name))
-                        addedColumns[name] = newColumns[name];
-                    else if(newColumns[name] > oldColumns[name])
-                        changedColumns[name] = newColumns[name];
+                    var newRank = newColumns[name];
+
+                    if(!oldColumns.ContainsKey(name)) {
+                        ValidateNewColumnRank(name, newRank, data[name]);
+                        addedColumns[name] = newRank;
+                    } else {
+                        var oldRank = oldColumns[name];
+                        if(newRank > oldRank && Math.Max(oldRank, newRank) < CommonDatabaseDetails.RANK_STATIC_BASE)
+                            changedColumns[name] = newRank;                        
+                    }
                 }
 
                 if(changedColumns.Count > 0 || addedColumns.Count > 0) {
@@ -299,7 +281,15 @@ namespace LimeBean {
             }
         }
 
-        void AppendKeyCriteria(string kind, IConvertible key, StringBuilder sql, ICollection<object> parameters) {
+        void ValidateNewColumnRank(string columnName, int rank, object value) {
+            if(rank < CommonDatabaseDetails.RANK_CUSTOM)
+                return;
+
+            var text = String.Format("Cannot automatically add column for property '{0}' of type '{1}'", columnName, value.GetType());
+            throw new InvalidOperationException(text);
+        }
+
+        void AppendKeyCriteria(string kind, object key, StringBuilder sql, ICollection<object> parameters) {
             sql.Append(" where ");
 
             var compound = key as CompoundKey;

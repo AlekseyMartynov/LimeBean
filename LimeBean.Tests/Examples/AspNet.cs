@@ -33,15 +33,4 @@ namespace LimeBean.Tests.Examples.AspNet {
 
     }
 
-    // You may use this auxiliary subclass for shorthand access to BeanApi from the inside
-    abstract class WebBean : Bean {
-        public WebBean(string kind)
-            : base(kind) {
-        }
-
-        protected static BeanApi R {
-            get { return Global.R; }
-        }
-    }
-
 }

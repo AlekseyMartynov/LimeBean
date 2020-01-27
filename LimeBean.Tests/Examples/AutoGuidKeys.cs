@@ -1,5 +1,4 @@
-﻿using NUnit.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
@@ -7,14 +6,12 @@ using System.Text;
 
 namespace LimeBean.Tests.Examples {
 
-    [TestFixture, Explicit]
     public class AutoGuidKeys {
-
-        [Test]
+        
         public void Scenario() {
             using(var api = new BeanApi("data source=:memory:", SQLiteFactory.Instance)) {
                 api.EnterFluidMode();
-                api.Key(false);
+                api.DefaultKey(false);
                 api.AddObserver(new GuidKeyObserver());
 
                 var bean = api.Dispense("foo");
@@ -26,8 +23,8 @@ namespace LimeBean.Tests.Examples {
 
         class GuidKeyObserver : BeanObserver {
             public override void BeforeStore(Bean bean) {
-                if(bean[Bean.ID_PROP_NAME] == null)
-                    bean[Bean.ID_PROP_NAME] = GenerateGuid();
+                if(bean["id"] == null)
+                    bean["id"] = GenerateGuid();
             }
 
             static string GenerateGuid() {

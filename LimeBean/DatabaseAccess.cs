@@ -18,10 +18,12 @@ namespace LimeBean {
             _connection = connection;
             _details = details;
             ImplicitTransactions = true;
+            TransactionIsolation = IsolationLevel.Unspecified;
         }
 
         public bool ImplicitTransactions { get; set; }
         public bool InTransaction { get { return _txStack.Count > 0; } }
+        public IsolationLevel TransactionIsolation { get; set; }
         public event Action<IDbCommand> QueryExecuting;
 
         public int CacheCapacity {
@@ -29,7 +31,7 @@ namespace LimeBean {
             set { _cache.Capacity = value; }
         }
 
-        public int Exec(string sql, object[] parameters) {
+        public int Exec(string sql, params object[] parameters) {
             using(var cmd = CreateCommand(new DbCommandDescriptor(sql, parameters))) {
                 QueryWillExecute(cmd);
                 return cmd.ExecuteNonQuery();
@@ -38,59 +40,59 @@ namespace LimeBean {
 
         // Iterators
 
-        public IEnumerable<T> ColIterator<T>(string sql, object[] parameters) where T : IConvertible {
+        public IEnumerable<T> ColIterator<T>(string sql, params object[] parameters) {
             return EnumerateRecords(new DbCommandDescriptor(sql, parameters), GetFirstCellValue<T>);
         }
 
-        public IEnumerable<IDictionary<string, IConvertible>> RowsIterator(string sql, object[] parameters) {
+        public IEnumerable<IDictionary<string, object>> RowsIterator(string sql, params object[] parameters) {
             return EnumerateRecords(new DbCommandDescriptor(sql, parameters), RecordToDict).ToArray();
         }
 
         // Cell
 
-        public T Cell<T>(bool useCache, string sql, object[] parameters) where T : IConvertible {
+        public T Cell<T>(bool useCache, string sql, params object[] parameters) {
             return CacheableRead(true, true, useCache, sql, parameters, Cell<T>);
         }
 
-        T Cell<T>(DbCommandDescriptor descriptor) where T : IConvertible {
+        T Cell<T>(DbCommandDescriptor descriptor) {
             return EnumerateRecords(descriptor, GetFirstCellValue<T>).FirstOrDefault();
         }
 
 
         // Col
 
-        public T[] Col<T>(bool useCache, string sql, object[] parameters) where T : IConvertible {
+        public T[] Col<T>(bool useCache, string sql, params object[] parameters) {
             return CacheableRead(true, false, useCache, sql, parameters, Col<T>);
         }
 
-        T[] Col<T>(DbCommandDescriptor descriptor) where T : IConvertible {
+        T[] Col<T>(DbCommandDescriptor descriptor) {
             return EnumerateRecords(descriptor, GetFirstCellValue<T>).ToArray();
         }
 
         // Row
 
-        public IDictionary<string, IConvertible> Row(bool useCache, string sql, object[] parameters) {
+        public IDictionary<string, object> Row(bool useCache, string sql, params object[] parameters) {
             return CacheableRead(false, true, useCache, sql, parameters, Row);
         }
 
-        IDictionary<string, IConvertible> Row(DbCommandDescriptor descriptor) {
+        IDictionary<string, object> Row(DbCommandDescriptor descriptor) {
             return EnumerateRecords(descriptor, RecordToDict).FirstOrDefault();
         }
 
         // Rows
 
-        public IDictionary<string, IConvertible>[] Rows(bool useCache, string sql, object[] parameters) {
+        public IDictionary<string, object>[] Rows(bool useCache, string sql, params object[] parameters) {
             return CacheableRead(false, false, useCache, sql, parameters, Rows);
         }
 
-        IDictionary<string, IConvertible>[] Rows(DbCommandDescriptor descriptor) {
+        IDictionary<string, object>[] Rows(DbCommandDescriptor descriptor) {
             return EnumerateRecords(descriptor, RecordToDict).ToArray();
         }
 
         // Transactions
 
         public void Transaction(Func<bool> action) {
-            using(var tx = _connection.BeginTransaction()) {
+            using(var tx = _connection.BeginTransaction(TransactionIsolation)) {
                 var shouldRollback = false;
 
                 _txStack.Push(tx);
@@ -152,29 +154,24 @@ namespace LimeBean {
             }
         }
 
-        static IDictionary<string, IConvertible> RecordToDict(IDataRecord record) {
+        static IDictionary<string, object> RecordToDict(IDataRecord record) {
             var count = record.FieldCount;
-            var result = new Dictionary<string, IConvertible>();
+            var result = new Dictionary<string, object>();
 
             for(var i = 0; i < count; i++)
-                result[record.GetName(i)] = GetCellValue<IConvertible>(record, i);
+                result[record.GetName(i)] = StripDbNull(record.GetValue(i));
 
             return result;
         }
 
-        static T GetFirstCellValue<T>(IDataRecord record) where T : IConvertible {
-            return GetCellValue<T>(record, 0);
+        static T GetFirstCellValue<T>(IDataRecord record) {
+            return StripDbNull(record.GetValue(0)).ConvertSafe<T>();
         }
 
-        static T GetCellValue<T>(IDataRecord record, int index) where T : IConvertible {
-            var value = record.GetValue(index) as IConvertible;
-            if(value == null || value is DBNull)
-                return default(T);
-
-            if(value is T)
-                return (T)value;
-
-            return (T)value.ToType(typeof(T), CultureInfo.InvariantCulture);
+        static object StripDbNull(object value) {
+            if(value == DBNull.Value)
+                return null;
+            return value;
         }
 
         void QueryWillExecute(IDbCommand cmd) {

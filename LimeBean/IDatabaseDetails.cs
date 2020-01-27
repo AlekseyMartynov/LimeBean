@@ -8,27 +8,28 @@ namespace LimeBean {
     interface IDatabaseDetails {
         string DbName { get; }
         string AutoIncrementSqlType { get; }
+        bool SupportsBoolean { get; }
+        bool SupportsDecimal { get; }
 
         string GetParamName(int index);
         string QuoteName(string name);
 
         void ExecInitCommands(IDatabaseAccess db);
-        long GetLastInsertID(IDatabaseAccess db);
+        object ExecInsert(IDatabaseAccess db, string tableName, string autoIncrementName, IDictionary<string, object> data);
         string GetCreateTableStatementPostfix();
-        string GetInsertDefaultsPostfix();
 
-        int GetRankFromValue(IConvertible value);
+        int GetRankFromValue(object value);
         int GetRankFromSqlType(string sqlType);
         string GetSqlTypeFromRank(int rank);
 
-        IConvertible ConvertLongValue(long value);
+        object ConvertLongValue(long value);
 
         string[] GetTableNames(IDatabaseAccess db);
-        IDictionary<string, IConvertible>[] GetColumns(IDatabaseAccess db, string tableName);
-        bool IsNullableColumn(IDictionary<string, IConvertible> column);
-        IConvertible GetColumnDefaultValue(IDictionary<string, IConvertible> column);
-        string GetColumnName(IDictionary<string, IConvertible> column);
-        string GetColumnType(IDictionary<string, IConvertible> column);
+        IDictionary<string, object>[] GetColumns(IDatabaseAccess db, string tableName);
+        bool IsNullableColumn(IDictionary<string, object> column);
+        object GetColumnDefaultValue(IDictionary<string, object> column);
+        string GetColumnName(IDictionary<string, object> column);
+        string GetColumnType(IDictionary<string, object> column);
 
         void UpdateSchema(
             IDatabaseAccess db, 

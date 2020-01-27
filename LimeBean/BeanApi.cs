@@ -8,11 +8,7 @@ using System.Text;
 namespace LimeBean {
 
     public class BeanApi : IDisposable, IBeanCrud, IBeanFinder, IDatabaseAccess, IValueRelaxations {
-        DbProviderFactory _provider;
-        string _connectionString;
-
-        bool _sharedConnection;
-        IDbConnection _connection;
+        ConnectionContainer _connectionContainer;
         IDatabaseDetails _details;
         IDatabaseAccess _db;
         KeyUtil _keyUtil;
@@ -20,36 +16,24 @@ namespace LimeBean {
         IBeanCrud _crud;
         IBeanFinder _finder;
 
-        public BeanApi(string connectionString, string providerName)
-            : this(connectionString, DbProviderFactories.GetFactory(providerName)) {
-        }
-
-        public BeanApi(string connectionString, DbProviderFactory provider) {
-            _connectionString = connectionString;
-            _provider = provider;
+        public BeanApi(string connectionString, DbProviderFactory factory) {
+            _connectionContainer = new ConnectionContainer.LazyImpl(connectionString, factory.CreateConnection);
         }
 
         public BeanApi(IDbConnection connection) {
-            _sharedConnection = true;
-            _connection = connection;
+            _connectionContainer = new ConnectionContainer.SimpleImpl(connection);
+        }
+
+        public BeanApi(string connectionString, Type connectionType) {
+            _connectionContainer = new ConnectionContainer.LazyImpl(connectionString, delegate() {
+                return (IDbConnection)Activator.CreateInstance(connectionType);
+            });
         }
 
         // Properties
 
         public IDbConnection Connection {
-            get {
-                if(_connection == null) {
-                    var c = _provider.CreateConnection();
-                    c.ConnectionString = _connectionString;
-                    c.Open();
-
-                    _provider = null;
-                    _connectionString = null;
-
-                    _connection = c;
-                }
-                return _connection;
-            }
+            get { return _connectionContainer.Connection; }
         }
 
         IDatabaseDetails Details {
@@ -86,8 +70,10 @@ namespace LimeBean {
 
         IBeanCrud Crud {
             get {
-                if(_crud == null)
+                if(_crud == null) {
                     _crud = new BeanCrud(Storage, Db, KeyUtil);
+                    _crud.AddObserver(new BeanApiLinker(this));
+                }
                 return _crud;
             }
         }
@@ -110,6 +96,9 @@ namespace LimeBean {
 
                 case "System.Data.SqlClient.SqlConnection":
                     return new MsSqlDetails();
+
+                case "Npgsql.NpgsqlConnection":
+                    return new PgSqlDetails();
             }
 
             throw new NotSupportedException();
@@ -125,8 +114,7 @@ namespace LimeBean {
         }
 
         public void Dispose() {
-            if(!_sharedConnection && _connection != null)
-                _connection.Dispose();
+            _connectionContainer.Dispose();
         }
 
         // IBeanCrud
@@ -152,23 +140,23 @@ namespace LimeBean {
             return Crud.Dispense<T>();
         }
 
-        public Bean RowToBean(string kind, IDictionary<string, IConvertible> row) {
+        public Bean RowToBean(string kind, IDictionary<string, object> row) {
             return Crud.RowToBean(kind, row);
         }
 
-        public T RowToBean<T>(IDictionary<string, IConvertible> row) where T : Bean, new() {
+        public T RowToBean<T>(IDictionary<string, object> row) where T : Bean, new() {
             return Crud.RowToBean<T>(row);
         }
 
-        public Bean Load(string kind, IConvertible key) {
+        public Bean Load(string kind, object key) {
             return Crud.Load(kind, key);
         }
 
-        public T Load<T>(IConvertible key) where T : Bean, new() {
+        public T Load<T>(object key) where T : Bean, new() {
             return Crud.Load<T>(key);
         }
 
-        public IConvertible Store(Bean bean) {
+        public object Store(Bean bean) {
             return Crud.Store(bean);
         }
 
@@ -226,27 +214,27 @@ namespace LimeBean {
             return Db.Exec(sql, parameters);
         }
 
-        public IEnumerable<T> ColIterator<T>(string sql, params object[] parameters) where T : IConvertible {
+        public IEnumerable<T> ColIterator<T>(string sql, params object[] parameters) {
             return Db.ColIterator<T>(sql, parameters);
         }
 
-        public IEnumerable<IDictionary<string, IConvertible>> RowsIterator(string sql, params object[] parameters) {
+        public IEnumerable<IDictionary<string, object>> RowsIterator(string sql, params object[] parameters) {
             return Db.RowsIterator(sql, parameters);
         }
 
-        public T Cell<T>(bool useCache, string sql, params object[] parameters) where T : IConvertible {
+        public T Cell<T>(bool useCache, string sql, params object[] parameters) {
             return Db.Cell<T>(useCache, sql, parameters);
         }
 
-        public T[] Col<T>(bool useCache, string sql, params object[] parameters) where T : IConvertible {
+        public T[] Col<T>(bool useCache, string sql, params object[] parameters) {
             return Db.Col<T>(useCache, sql, parameters);
         }
 
-        public IDictionary<string, IConvertible> Row(bool useCache, string sql, params object[] parameters) {
+        public IDictionary<string, object> Row(bool useCache, string sql, params object[] parameters) {
             return Db.Row(useCache, sql, parameters);
         }
 
-        public IDictionary<string, IConvertible>[] Rows(bool useCache, string sql, params object[] parameters) {
+        public IDictionary<string, object>[] Rows(bool useCache, string sql, params object[] parameters) {
             return Db.Rows(useCache, sql, parameters);
         }
 
@@ -259,6 +247,11 @@ namespace LimeBean {
 
         public bool InTransaction {
             get { return Db.InTransaction; }
+        }
+
+        public IsolationLevel TransactionIsolation {
+            get { return Db.TransactionIsolation; }
+            set { Db.TransactionIsolation = value; }
         }
 
         public void Transaction(Func<bool> action) {
@@ -284,11 +277,11 @@ namespace LimeBean {
 
         // Shortcuts
 
-        public Bean Load(string kind, params IConvertible[] compoundKey){
+        public Bean Load(string kind, params object[] compoundKey) {
             return Load(kind, KeyUtil.PackCompoundKey(kind, compoundKey));
         }
 
-        public T Load<T>(params IConvertible[] compoundKey) where T : Bean, new() {
+        public T Load<T>(params object[] compoundKey) where T : Bean, new() {
             return Load<T>(KeyUtil.PackCompoundKey(Bean.GetKind<T>(), compoundKey));
         }
 
@@ -316,19 +309,31 @@ namespace LimeBean {
             return Count<T>(true, expr, parameters);
         }
 
-        public T Cell<T>(string sql, params object[] parameters) where T : IConvertible {
+        public IEnumerable<object> ColIterator(string sql, params object[] parameters) {
+            return ColIterator<object>(sql, parameters);
+        }
+
+        public T Cell<T>(string sql, params object[] parameters) {
             return Cell<T>(true, sql, parameters);
         }
 
-        public T[] Col<T>(string sql, params object[] parameters) where T : IConvertible {
+        public object Cell(string sql, params object[] parameters) {
+            return Cell<object>(sql, parameters);
+        }
+
+        public T[] Col<T>(string sql, params object[] parameters) {
             return Col<T>(true, sql, parameters);
         }
 
-        public IDictionary<string, IConvertible> Row(string sql, params object[] parameters) {
+        public object[] Col(string sql, params object[] parameters) {
+            return Col<object>(true, sql, parameters);
+        }
+
+        public IDictionary<string, object> Row(string sql, params object[] parameters) {
             return Row(true, sql, parameters);
         }
 
-        public IDictionary<string, IConvertible>[] Rows(string sql, params object[] parameters) {
+        public IDictionary<string, object>[] Rows(string sql, params object[] parameters) {
             return Rows(true, sql, parameters);
         }
 
@@ -357,8 +362,13 @@ namespace LimeBean {
             Key(Bean.GetKind<T>(), names);
         }
 
-        public void Key(bool autoIncrementByDefault) {
-            KeyUtil.AutoIncrementByDefault = autoIncrementByDefault;
+        public void DefaultKey(bool autoIncrement) {
+            KeyUtil.DefaultAutoIncrement = autoIncrement;
+        }
+
+        public void DefaultKey(string name, bool autoIncrement = true) {
+            KeyUtil.DefaultName = name;
+            KeyUtil.DefaultAutoIncrement = autoIncrement;
         }
 
     }

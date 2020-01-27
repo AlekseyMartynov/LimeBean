@@ -1,5 +1,4 @@
-﻿using NUnit.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
@@ -7,24 +6,7 @@ using System.Text;
 
 namespace LimeBean.Tests.Examples {
 
-    [TestFixture, Explicit]
-    public class Northwind {
-        // NOTE in web apps BeanApi must have per-request life-time
-        // For example, in ASP.NET it should live in HttpContext.Items
-        public static BeanApi R { get; set; }
-
-        [SetUp]
-        public void SetUp() {
-            R = new BeanApi("data source=:memory:", SQLiteFactory.Instance);
-            R.Key<Category>("CategoryID");
-            R.Key<Product>("ProductID");            
-            R.EnterFluidMode();
-        }
-
-        [TearDown]
-        public void TearDown() {
-            R.Dispose();
-        }
+    public class Northwind  {
 
         class Category : Bean {
 
@@ -35,7 +17,7 @@ namespace LimeBean.Tests.Examples {
             // Typed property accessors
 
             public int? CategoryID {
-                get { return GetNullable<int>("CategoryID"); }
+                get { return Get<int?>("CategoryID"); }
                 set { Put("CategoryID", value); }
             }
 
@@ -54,7 +36,7 @@ namespace LimeBean.Tests.Examples {
             // Helper method to find all products in this category
             // NOTE internal LRU cache is used, so DB is not hit every time
             public Product[] GetProducts() {
-                return R.Find<Product>("where CategoryID = ?", CategoryID);
+                return GetApi().Find<Product>("where CategoryID = ?", CategoryID);
             }
 
             // Validation rules prevent storing of unnamed categories
@@ -68,7 +50,7 @@ namespace LimeBean.Tests.Examples {
             // so that consistency is maintained
             protected internal override void BeforeTrash() {
                 foreach(var p in GetProducts())
-                    R.Trash(p);
+                    GetApi().Trash(p);
             }
 
             public override string ToString() {
@@ -88,7 +70,7 @@ namespace LimeBean.Tests.Examples {
             // Typed accessors
 
             public int? ProductID {
-                get { return GetNullable<int>("ProductID"); }
+                get { return Get<int?>("ProductID"); }
                 set { Put("ProductID", value); }
             }
 
@@ -98,7 +80,7 @@ namespace LimeBean.Tests.Examples {
             }
 
             public int? CategoryID {
-                get { return GetNullable<int>("CategoryID"); }
+                get { return Get<int?>("CategoryID"); }
                 set { Put("CategoryID", value); }
             }
 
@@ -115,7 +97,7 @@ namespace LimeBean.Tests.Examples {
             // Example of a referenced bean
             // NOTE internal LRU cache is used during loading
             public Category Category {
-                get { return R.Load<Category>(CategoryID); }
+                get { return GetApi().Load<Category>(CategoryID); }
                 set { CategoryID = value.CategoryID; }
             }
 
@@ -133,46 +115,51 @@ namespace LimeBean.Tests.Examples {
         }
 
 
-        [Test]
         public void Scenario() {
-            var beverages = R.Dispense<Category>();
-            beverages.CategoryName = "Beverages";
-            beverages.Description = "Soft drinks, coffees, teas, beers, and ales";
+            using(var R = new BeanApi("data source=:memory:", SQLiteFactory.Instance)) {
+                R.Key<Category>("CategoryID");
+                R.Key<Product>("ProductID");
+                R.EnterFluidMode();
 
-            var condiments = R.Dispense<Category>();
-            condiments.CategoryName = "Condiments";
-            condiments.Description = "Sweet and savory sauces, relishes, spreads, and seasonings";
+                var beverages = R.Dispense<Category>();
+                beverages.CategoryName = "Beverages";
+                beverages.Description = "Soft drinks, coffees, teas, beers, and ales";
 
-            R.Store(beverages);
-            R.Store(condiments);
+                var condiments = R.Dispense<Category>();
+                condiments.CategoryName = "Condiments";
+                condiments.Description = "Sweet and savory sauces, relishes, spreads, and seasonings";
+
+                R.Store(beverages);
+                R.Store(condiments);
 
 
-            var chai = R.Dispense<Product>();
-            chai.Name = "Chai";
-            chai.UnitPrice = 18;
-            chai.Category = beverages;
+                var chai = R.Dispense<Product>();
+                chai.Name = "Chai";
+                chai.UnitPrice = 18;
+                chai.Category = beverages;
 
-            var chang = R.Dispense<Product>();
-            chang.Name = "Chang";
-            chang.UnitPrice = 19;
-            chang.Category = beverages;
+                var chang = R.Dispense<Product>();
+                chang.Name = "Chang";
+                chang.UnitPrice = 19;
+                chang.Category = beverages;
 
-            var syrup = R.Dispense<Product>();
-            syrup.Name = "Aniseed Syrup";
-            syrup.UnitPrice = 9.95M;
-            syrup.Category = condiments;
-            syrup.Discontinued = true;
+                var syrup = R.Dispense<Product>();
+                syrup.Name = "Aniseed Syrup";
+                syrup.UnitPrice = 9.95M;
+                syrup.Category = condiments;
+                syrup.Discontinued = true;
 
-            R.Store(chai);
-            R.Store(chang);
-            R.Store(syrup);
+                R.Store(chai);
+                R.Store(chang);
+                R.Store(syrup);
 
-            Console.WriteLine("Number of known beverages: {0}", beverages.GetProducts().Length);
+                Console.WriteLine("Number of known beverages: {0}", beverages.GetProducts().Length);
 
-            Console.WriteLine("Deleting all the beverages...");
-            R.Trash(beverages);
+                Console.WriteLine("Deleting all the beverages...");
+                R.Trash(beverages);
 
-            Console.WriteLine("Products remained: {0}", R.Count<Product>());
+                Console.WriteLine("Products remained: {0}", R.Count<Product>());
+            }
         }
 
     }
