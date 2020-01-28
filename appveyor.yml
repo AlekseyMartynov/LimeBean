@@ -1,0 +1,15 @@
+version: '{build}'
+image: Visual Studio 2019
+
+environment:
+  LIME_TEST_MARIA_PWD: Password12!
+  LIME_TEST_PGSQL_PWD: Password12!
+
+services:
+  - mysql
+  - postgresql
+
+build: off
+
+test_script:
+  - dotnet test
