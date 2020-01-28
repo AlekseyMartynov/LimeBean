@@ -122,7 +122,7 @@ namespace LimeBean.Tests {
 
         [Fact]
         public void ChangeSchemaWhenFrozen() {
-            Assert.Throws(typeof(SQLiteException), delegate () {
+            Assert.Throws<SQLiteException>(delegate () {
                 _storage.Store("unlucky", SharedChecks.MakeRow("a", 1));
             });
         }
@@ -154,7 +154,7 @@ namespace LimeBean.Tests {
 
         [Fact]
         public void LoadFromMissingTable() {
-            Assert.Throws(typeof(SQLiteException), delegate () {
+            Assert.Throws<SQLiteException>(delegate () {
                 _storage.Load("phantom", 1);
             });
 
@@ -258,7 +258,7 @@ namespace LimeBean.Tests {
 
         [Fact]
         public void TrashFromMissingTable() {
-            Assert.Throws(typeof(SQLiteException), delegate () {
+            Assert.Throws<SQLiteException>(delegate () {
                 _storage.Trash("kind1", 1);
             });
 

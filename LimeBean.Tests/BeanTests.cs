@@ -136,7 +136,7 @@ namespace LimeBean.Tests {
 
             Assert.Equal(1, bean["a"]);
             Assert.Equal(2, bean["b"]);
-            Assert.Equal(null, bean["c"]);
+            Assert.Null(bean["c"]);
 
             data["b"] = "changed";
             Assert.Equal(2, bean["b"]);
