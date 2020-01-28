@@ -1,17 +1,16 @@
 # LimeBean
 
-[![Build status](https://ci.appveyor.com/api/projects/status/o3lauspwhfk898o7)](https://ci.appveyor.com/project/AlekseyMartynov/limebean)
-
 [RedBeanPHP](http://redbeanphp.com/)-inspired data access layer for .NET and Mono.
 
 ## Supported Databases
 * MySQL/MariaDB
 * SQLite
 * SQL Server
+* PostgreSQL
 
 ## Synopsis
 
-LimeBean treats your data entities as `IDictionary<string, IConvertible>` and maintains the database schema on the fly (when in fluid mode).
+LimeBean treats your data entities as `IDictionary<string, object>` and maintains the database schema on the fly (when in fluid mode).
 
 LimeBean does not use any Reflection, IL emitting, `dynamic`, etc. Instead it relies on strings, dictionaries and fragments of plain SQL.  
 
@@ -25,13 +24,3 @@ LimeBean does not use any Reflection, IL emitting, `dynamic`, etc. Instead it re
 ## API
 
 All available properties and methods are exposed via the [BeanApi facade class](https://github.com/AlekseyMartynov/LimeBean/blob/master/LimeBean/BeanApi.cs).
-
-## Limitations and Cautions
-
-* Non thread-safe: use one API instance per thread, or maintain thread synchronization with locks. Read-only access is not thread-safe either because of the internal LRU cache.
-* Property values must be `IConvertible`. Any other values have to be stored as strings.
-
-## License
-
-* The contents of the [LimeBean directory](https://github.com/AlekseyMartynov/LimeBean/tree/master/LimeBean) and the produced assembly **bin/LimeBean.dll** are licensed under the [MIT license](https://github.com/AlekseyMartynov/LimeBean/blob/master/LimeBean/LICENSE.txt).
-* Any other files (unit tests, etc) are for development and testing purposes only.
