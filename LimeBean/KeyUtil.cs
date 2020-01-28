@@ -5,7 +5,7 @@ using System.Text;
 
 namespace LimeBean {
     class KeyUtil : IKeyAccess {
-        IDictionary<string, ICollection<string>> _names = new Dictionary<string, ICollection<string>>();
+        IDictionary<string, IReadOnlyList<string>> _names = new Dictionary<string, IReadOnlyList<string>>();
         IDictionary<string, bool> _autoIncrements = new Dictionary<string, bool>();
 
         public string DefaultName = "id";
@@ -15,7 +15,7 @@ namespace LimeBean {
             return _autoIncrements.GetSafe(kind, GetKeyNames(kind).Count > 1 ? false : DefaultAutoIncrement);
         }
 
-        public ICollection<string> GetKeyNames(string kind) {
+        public IReadOnlyList<string> GetKeyNames(string kind) {
             return _names.GetSafe(kind, new[] { DefaultName });
         }
 
@@ -43,7 +43,7 @@ namespace LimeBean {
                 data[name] = key;
         }
 
-        public void RegisterKey(string kind, ICollection<string> names, bool? autoIncrement) {
+        public void RegisterKey(string kind, IReadOnlyList<string> names, bool? autoIncrement) {
             if(names.Count < 1)
                 throw new ArgumentException();
 
@@ -53,10 +53,11 @@ namespace LimeBean {
                 _autoIncrements[kind] = autoIncrement.Value;
         }
 
-        public object PackCompoundKey(string kind, IEnumerable<object> components) {
+        public object PackCompoundKey(string kind, IReadOnlyList<object> components) {
             var result = new CompoundKey();
-            foreach(var tuple in Enumerable.Zip(GetKeyNames(kind), components, Tuple.Create))
-                result[tuple.Item1] = tuple.Item2;
+            var names = GetKeyNames(kind);
+            for(var i = 0; i < components.Count; i++)
+                result[names[i]] = components[i];
 
             return result;
         }
