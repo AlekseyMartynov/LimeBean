@@ -46,7 +46,7 @@ namespace LimeBean.Tests {
             _db.Exec("create table kind1 (id integer primary key, p1, p2)");
 
             var id = _storage.Store("kind1", SharedChecks.MakeRow(
-                "p1", 123, 
+                "p1", 123,
                 "p2", "hello"
             ));
 
@@ -59,7 +59,7 @@ namespace LimeBean.Tests {
             Assert.Equal(id, _storage.Store("kind1", SharedChecks.MakeRow(
                 "id", id,
                 "p1", -1,
-                "p2", "see you"            
+                "p2", "see you"
             )));
 
             row = _db.Row(true, "select * from kind1");
@@ -122,7 +122,7 @@ namespace LimeBean.Tests {
 
         [Fact]
         public void ChangeSchemaWhenFrozen() {
-            Assert.Throws(typeof(SQLiteException), delegate() {
+            Assert.Throws(typeof(SQLiteException), delegate () {
                 _storage.Store("unlucky", SharedChecks.MakeRow("a", 1));
             });
         }
@@ -134,7 +134,7 @@ namespace LimeBean.Tests {
             var id = _storage.Store("kind1", SharedChecks.MakeRow());
             Assert.Equal(1, _db.Cell<int>(true, "select count(*) from kind1"));
 
-            Assert.Null(Record.Exception(delegate() {
+            Assert.Null(Record.Exception(delegate () {
                 _storage.Store("kind1", SharedChecks.MakeRow("id", id));
             }));
         }
@@ -143,9 +143,9 @@ namespace LimeBean.Tests {
         public void StoreWithKeyMissingFromDb() {
             _storage.EnterFluidMode();
 
-            var error = Record.Exception(delegate() {
+            var error = Record.Exception(delegate () {
                 _storage.Store("foo", SharedChecks.MakeRow(
-                    "id", 123, 
+                    "id", 123,
                     "a", 1
                 ));
             });
@@ -154,7 +154,7 @@ namespace LimeBean.Tests {
 
         [Fact]
         public void LoadFromMissingTable() {
-            Assert.Throws(typeof(SQLiteException), delegate() {
+            Assert.Throws(typeof(SQLiteException), delegate () {
                 _storage.Load("phantom", 1);
             });
 
@@ -186,7 +186,7 @@ namespace LimeBean.Tests {
 
         [Fact]
         public void Roundtrip() {
-            AssertExtensions.WithCulture("ru", delegate() {
+            AssertExtensions.WithCulture("ru", delegate () {
                 _storage.EnterFluidMode();
                 var checker = new RoundtripChecker(_db, _storage);
 
@@ -258,13 +258,13 @@ namespace LimeBean.Tests {
 
         [Fact]
         public void TrashFromMissingTable() {
-            Assert.Throws(typeof(SQLiteException), delegate() {
+            Assert.Throws(typeof(SQLiteException), delegate () {
                 _storage.Trash("kind1", 1);
             });
 
-            Assert.Null(Record.Exception(delegate() {
+            Assert.Null(Record.Exception(delegate () {
                 _storage.EnterFluidMode();
-                _storage.Trash("kind1", 1);            
+                _storage.Trash("kind1", 1);
             }));
         }
 
@@ -287,7 +287,7 @@ namespace LimeBean.Tests {
         public void Booleans() {
             _storage.EnterFluidMode();
 
-            var trueKeys = new[] { 
+            var trueKeys = new[] {
                 _storage.Store("foo", SharedChecks.MakeRow("x", true)),
                 _storage.Store("foo", SharedChecks.MakeRow("x", 1)),
                 _storage.Store("foo", SharedChecks.MakeRow("x", "1"))
@@ -299,7 +299,7 @@ namespace LimeBean.Tests {
                 _storage.Store("foo", SharedChecks.MakeRow("x", "0"))
             };
 
-            var nullKeys = new[] { 
+            var nullKeys = new[] {
                 _storage.Store("foo", SharedChecks.MakeRow("x", null)),
                 _storage.Store("foo", SharedChecks.MakeRow("x", ""))
             };
@@ -311,7 +311,7 @@ namespace LimeBean.Tests {
 
         [Fact]
         public void BacktickInName() {
-            Assert.Throws<ArgumentException>(delegate() {
+            Assert.Throws<ArgumentException>(delegate () {
                 new SQLiteDetails().QuoteName("`");
             });
         }

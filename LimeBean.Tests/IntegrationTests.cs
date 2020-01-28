@@ -49,12 +49,12 @@ namespace LimeBean.Tests {
                 try { api.Store(bean); } catch { }
 
                 Assert.Equal(1, api.Count<ThrowingBean>());
-            }           
+            }
         }
 
         [Fact]
         public void Api_DetailsSelection() {
-            Assert.Equal("SQLite", new BeanApi(new SQLiteConnection("data source=:memory:")).CreateDetails().DbName);            
+            Assert.Equal("SQLite", new BeanApi(new SQLiteConnection("data source=:memory:")).CreateDetails().DbName);
             Assert.Equal("MsSql", new BeanApi(new SqlConnection()).CreateDetails().DbName);
             Assert.Equal("MariaDB", new BeanApi(new MySql.Data.MySqlClient.MySqlConnection()).CreateDetails().DbName);
             Assert.Equal("PgSql", new BeanApi(new Npgsql.NpgsqlConnection()).CreateDetails().DbName);
@@ -119,7 +119,7 @@ namespace LimeBean.Tests {
         class ApiLinkChecker : Bean {
             public Dictionary<string, BeanApi> Trace = new Dictionary<string, BeanApi>();
 
-            public ApiLinkChecker() 
+            public ApiLinkChecker()
                 : base("foo") {
             }
 

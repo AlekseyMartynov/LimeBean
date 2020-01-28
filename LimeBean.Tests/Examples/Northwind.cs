@@ -6,7 +6,7 @@ using System.Text;
 
 namespace LimeBean.Tests.Examples {
 
-    public class Northwind  {
+    public class Northwind {
 
         class Category : Bean {
 
@@ -45,7 +45,7 @@ namespace LimeBean.Tests.Examples {
                     throw new Exception("Category name cannot be empty");
             }
 
-            // Cascading delete of all its products 
+            // Cascading delete of all its products
             // NOTE deletion is wrapped in an implicit transaction
             // so that consistency is maintained
             protected internal override void BeforeTrash() {

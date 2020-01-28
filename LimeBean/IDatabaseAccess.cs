@@ -9,7 +9,7 @@ namespace LimeBean {
 
     interface IDatabaseAccess : ITransactionSupport {
         event Action<IDbCommand> QueryExecuting;
-        int CacheCapacity { get; set; }        
+        int CacheCapacity { get; set; }
 
         int Exec(string sql, params object[] parameters);
 

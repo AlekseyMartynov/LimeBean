@@ -32,11 +32,11 @@ namespace LimeBean {
         string GetColumnType(IDictionary<string, object> column);
 
         void UpdateSchema(
-            IDatabaseAccess db, 
-            string tableName, 
+            IDatabaseAccess db,
+            string tableName,
             string autoIncrementName,
-            IDictionary<string, int> oldColumns, 
-            IDictionary<string, int> changedColumns, 
+            IDictionary<string, int> oldColumns,
+            IDictionary<string, int> changedColumns,
             IDictionary<string, int> addedColumns
         );
 

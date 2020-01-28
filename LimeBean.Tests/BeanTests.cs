@@ -5,7 +5,7 @@ using System.Text;
 using Xunit;
 
 namespace LimeBean.Tests {
-    
+
     public class BeanTests {
 
         [Fact]
@@ -45,7 +45,7 @@ namespace LimeBean.Tests {
 
         [Fact]
         public void TypedAccessors_Conversion() {
-            AssertExtensions.WithCulture("ru", delegate() {
+            AssertExtensions.WithCulture("ru", delegate () {
                 var bean = new Bean();
 
                 bean.Put("x", "3.14");
@@ -102,7 +102,7 @@ namespace LimeBean.Tests {
         }
 
         [Fact]
-        public void Kind() { 
+        public void Kind() {
             var bean = new Bean("kind1");
             Assert.Equal("kind1", bean.GetKind());
         }
@@ -118,7 +118,7 @@ namespace LimeBean.Tests {
             var bean = new Bean();
             bean["id"] = 123;
             bean.Put("a", 1).Put("b", "abc");
-            AssertExtensions.Equivalent(bean.Export(), new Dictionary<string, object> { 
+            AssertExtensions.Equivalent(bean.Export(), new Dictionary<string, object> {
                 { "id", 123 }, { "a", 1 }, { "b", "abc" }
             });
             Assert.NotSame(bean.Export(), bean.Export());

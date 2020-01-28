@@ -40,7 +40,7 @@ namespace LimeBean {
         public Bean RowToBean(string kind, IDictionary<string, object> row) {
             if(row == null)
                 return null;
-            
+
             return ContinueLoad(Dispense(kind), row);
         }
 
@@ -62,7 +62,7 @@ namespace LimeBean {
         public object Store(Bean bean) {
             EnsureDispensed(bean);
 
-            ImplicitTransaction(delegate() {
+            ImplicitTransaction(delegate () {
                 bean.BeforeStore();
                 foreach(var observer in _observers)
                     observer.BeforeStore(bean);
@@ -91,7 +91,7 @@ namespace LimeBean {
             if(bean.GetKey(_keyAccess) == null)
                 return;
 
-            ImplicitTransaction(delegate() {
+            ImplicitTransaction(delegate () {
                 bean.BeforeTrash();
                 foreach(var observer in _observers)
                     observer.BeforeTrash(bean);

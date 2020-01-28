@@ -25,7 +25,7 @@ namespace LimeBean {
         }
 
         public BeanApi(string connectionString, Type connectionType) {
-            _connectionContainer = new ConnectionContainer.LazyImpl(connectionString, delegate() {
+            _connectionContainer = new ConnectionContainer.LazyImpl(connectionString, delegate () {
                 return (IDbConnection)Activator.CreateInstance(connectionType);
             });
         }
@@ -52,7 +52,7 @@ namespace LimeBean {
             }
         }
 
-        KeyUtil KeyUtil { 
+        KeyUtil KeyUtil {
             get {
                 if(_keyUtil == null)
                     _keyUtil = new KeyUtil();
@@ -86,11 +86,11 @@ namespace LimeBean {
             }
         }
 
-        internal IDatabaseDetails CreateDetails() { 
-            switch(Connection.GetType().FullName) { 
+        internal IDatabaseDetails CreateDetails() {
+            switch(Connection.GetType().FullName) {
                 case "System.Data.SQLite.SQLiteConnection":
                     return new SQLiteDetails();
-    
+
                 case "MySql.Data.MySqlClient.MySqlConnection":
                     return new MariaDbDetails();
 
@@ -191,11 +191,11 @@ namespace LimeBean {
         }
 
         public long Count(bool useCache, string kind, string expr = null, params object[] parameters) {
-            return Finder.Count(useCache, kind, expr, parameters);            
+            return Finder.Count(useCache, kind, expr, parameters);
         }
 
         public long Count<T>(bool useCache, string expr = null, params object[] parameters) where T : Bean, new() {
-            return Finder.Count<T>(useCache, expr, parameters);            
+            return Finder.Count<T>(useCache, expr, parameters);
         }
 
         // IDatabaseAccess
@@ -338,7 +338,7 @@ namespace LimeBean {
         }
 
         public void Transaction(Action action) {
-            Transaction(delegate() {
+            Transaction(delegate () {
                 action();
                 return true;
             });

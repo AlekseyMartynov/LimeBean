@@ -135,7 +135,7 @@ namespace LimeBean {
             if(sqlType.StartsWith("36:"))
                 return RANK_STATIC_GUID;
 
-            switch(sqlType) { 
+            switch(sqlType) {
                 case "62:8":
                     return RANK_DOUBLE;
 
@@ -156,7 +156,7 @@ namespace LimeBean {
         }
 
         public string GetSqlTypeFromRank(int rank) {
-            switch(rank) { 
+            switch(rank) {
                 case RANK_BYTE:
                     return "tinyint";
 

@@ -26,7 +26,7 @@ namespace LimeBean.Tests {
             var savedQueryCount = queryCount;
             db.Cell<int>(true, "Select * from foo");
 
-            Assert.Equal(savedQueryCount, queryCount);        
+            Assert.Equal(savedQueryCount, queryCount);
         }
 
         public static void CheckRoundtripOfExtremalValues(RoundtripChecker checker, bool checkDecimal = false, bool checkDateTime = false, bool checkDateTimeOffset = false) {
@@ -43,7 +43,7 @@ namespace LimeBean.Tests {
 
             if(checkDateTime) {
                 checker.Check(DateTime.MinValue, DateTime.MinValue);
-                checker.Check(DateTime.MaxValue.Date, DateTime.MaxValue.Date);            
+                checker.Check(DateTime.MaxValue.Date, DateTime.MaxValue.Date);
             }
 
             if(checkDateTimeOffset) {
@@ -65,14 +65,14 @@ namespace LimeBean.Tests {
 
             var bigLong = Int64.MinValue + 12345;
             var longID = storage.Store("foo", MakeRow("p", bigLong));
-            
+
             storage.Store("foo", MakeRow("p", Math.PI));
             Assert.Equal(bigLong, db.Cell<long>(false, "select p from foo where id = {0}", longID));
-        } 
+        }
 
         public static void CheckDateTimeQueries(IDatabaseAccess db, DatabaseStorage storage) {
             storage.EnterFluidMode();
-            
+
             var dateTime = SAMPLE_DATETIME;
             var date = SAMPLE_DATETIME.Date;
 
@@ -86,7 +86,7 @@ namespace LimeBean.Tests {
                 storage.Store("foo", MakeRow("d", date.AddDays(i)));
             Assert.Equal(3, db.Cell<int>(false, "select count(*) from foo where d between {0} and {1}", date.AddDays(-1), date.AddDays(1)));
 
-            Assert.Equal(date, db.Cell<DateTime>(false, "select d from foo where d = {0}", date));        
+            Assert.Equal(date, db.Cell<DateTime>(false, "select d from foo where d = {0}", date));
         }
 
         public static void CheckGuidQuery(IDatabaseAccess db, DatabaseStorage storage) {
@@ -99,11 +99,11 @@ namespace LimeBean.Tests {
             db1.Exec("create table foo(f text)");
             db1.Exec("insert into foo(f) values('initial')");
 
-            db1.Transaction(delegate() {
+            db1.Transaction(delegate () {
                 db1.Exec("update foo set f='dirty'");
 
                 db2.TransactionIsolation = IsolationLevel.ReadUncommitted;
-                db2.Transaction(delegate() {
+                db2.Transaction(delegate () {
                     Assert.Equal("dirty", db2.Cell<string>(false, "select f from foo"));
                     return true;
                 });
@@ -118,14 +118,14 @@ namespace LimeBean.Tests {
             var row = MakeRow("a", new object());
 
             // Try create table
-            AssertCannotAddColumn(Record.Exception(delegate() {
+            AssertCannotAddColumn(Record.Exception(delegate () {
                 storage.Store("foo1", row);
             }));
 
             storage.Store("foo2", MakeRow("b", 1));
 
             // Try add column
-            AssertCannotAddColumn(Record.Exception(delegate() {
+            AssertCannotAddColumn(Record.Exception(delegate () {
                 storage.Store("foo2", row);
             }));
         }

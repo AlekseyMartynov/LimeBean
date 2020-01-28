@@ -17,7 +17,7 @@ namespace LimeBean.Tests.Examples {
             // Enable automatic schema update
             R.EnterFluidMode();
 
-            // create a bean 
+            // create a bean
             var bean = R.Dispense("person");
 
             // it's of kind "person"
@@ -50,7 +50,7 @@ namespace LimeBean.Tests.Examples {
             R.Trash(bean);
 
             // close the connection
-            R.Dispose();                
+            R.Dispose();
         }
 
     }

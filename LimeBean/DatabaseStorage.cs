@@ -83,7 +83,7 @@ namespace LimeBean {
             if(value is UInt64) {
                 var number = (ulong)value;
                 value = number <= Int64.MaxValue ? (long)number : (decimal)number;
-            }                
+            }
 
             if(value is Boolean) {
                 if(_details.SupportsBoolean)
@@ -103,7 +103,7 @@ namespace LimeBean {
                 if(RecognizeIntegers && number.IsSafeInteger())
                     return _details.ConvertLongValue(Convert.ToInt64(number));
 
-                return number;        
+                return number;
             }
 
             if(value is String) {
@@ -133,7 +133,7 @@ namespace LimeBean {
             return Store(kind, data, null);
         }
 
-        public object Store(string kind, IDictionary<string, object> data, ICollection<string> dirtyNames) {            
+        public object Store(string kind, IDictionary<string, object> data, ICollection<string> dirtyNames) {
             var key = _keyAccess.GetKey(kind, data);
             var autoIncrement = _keyAccess.IsAutoIncrement(kind);
 
@@ -226,9 +226,9 @@ namespace LimeBean {
             var sql = new StringBuilder(prefix)
                 .Append(" from ")
                 .Append(QuoteName(kind));
-            
+
             AppendKeyCriteria(kind, key, sql, parameters);
-            
+
             return Tuple.Create(sql.ToString(), parameters.ToArray());
         }
 
@@ -237,7 +237,7 @@ namespace LimeBean {
             var result = new Dictionary<string, object>();
 
             foreach(var entry in data) {
-                if(entry.Value != null || schema.ContainsKey(kind) && schema[kind].ContainsKey(entry.Key))                    
+                if(entry.Value != null || schema.ContainsKey(kind) && schema[kind].ContainsKey(entry.Key))
                     result[entry.Key] = entry.Value;
             }
 
@@ -253,7 +253,7 @@ namespace LimeBean {
 
             if(!IsKnownKind(kind)) {
                 foreach(var name in newColumns.Keys)
-                    ValidateNewColumnRank(name, newColumns[name], data[name]);                
+                    ValidateNewColumnRank(name, newColumns[name], data[name]);
                 _db.Exec(CommonDatabaseDetails.FormatCreateTableCommand(_details, kind, autoIncrementName, newColumns));
                 InvalidateSchema();
             } else {
@@ -270,7 +270,7 @@ namespace LimeBean {
                     } else {
                         var oldRank = oldColumns[name];
                         if(newRank > oldRank && Math.Max(oldRank, newRank) < CommonDatabaseDetails.RANK_STATIC_BASE)
-                            changedColumns[name] = newRank;                        
+                            changedColumns[name] = newRank;
                     }
                 }
 
@@ -301,8 +301,8 @@ namespace LimeBean {
             var first = true;
             foreach(var name in names) {
                 if(!first)
-                    sql.Append(" and ");                
-            
+                    sql.Append(" and ");
+
                 sql.Append(QuoteName(name)).Append(" = {").Append(parameters.Count).Append("}");
 
                 if(compound != null)
@@ -312,7 +312,7 @@ namespace LimeBean {
 
                 first = false;
             }
-            
+
         }
 
         string QuoteName(string name) {

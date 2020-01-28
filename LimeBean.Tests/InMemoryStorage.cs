@@ -7,7 +7,7 @@ using System.Text;
 namespace LimeBean.Tests {
 
     class InMemoryStorage : IStorage {
-        IList<IDictionary<string, object>> _storage = new List<IDictionary<string, object>>();        
+        IList<IDictionary<string, object>> _storage = new List<IDictionary<string, object>>();
         long _autoId = 0;
         IKeyAccess _keyAccess = new KeyUtil();
 

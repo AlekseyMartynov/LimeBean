@@ -6,10 +6,10 @@ using System.Text;
 
 namespace LimeBean {
 
-    abstract class ConnectionContainer  {
+    abstract class ConnectionContainer {
         public abstract IDbConnection Connection { get; }
 
-        public virtual void Dispose() {         
+        public virtual void Dispose() {
         }
 
         internal class SimpleImpl : ConnectionContainer {
@@ -19,8 +19,8 @@ namespace LimeBean {
                 _conn = conn;
             }
 
-            public override IDbConnection Connection { 
-                get { return _conn; } 
+            public override IDbConnection Connection {
+                get { return _conn; }
             }
         }
 
@@ -37,13 +37,13 @@ namespace LimeBean {
             public override IDbConnection Connection {
                 get {
                     if(_conn == null) {
-                        _conn = _factory();                        
+                        _conn = _factory();
                         _conn.ConnectionString = _connectionString;
                         _conn.Open();
                         _factory = null;
                         _connectionString = null;
                     }
-                    return _conn; 
+                    return _conn;
                 }
             }
 

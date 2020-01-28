@@ -56,7 +56,7 @@ namespace LimeBean {
             }
         }
 
-        public void Remove(K key) { 
+        public void Remove(K key) {
             if(!Contains(key))
                 return;
 

@@ -35,7 +35,7 @@ namespace LimeBean.Tests.Fixtures {
             _dropList.Add(name);
 
             Exec(Connection, "create database " + name);
-            Exec(Connection, "use " + name);  
+            Exec(Connection, "use " + name);
         }
 
         public override void TearDownDatabase() {

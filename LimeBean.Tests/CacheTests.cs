@@ -12,7 +12,7 @@ namespace LimeBean.Tests {
         public void MapFunctionality() {
             var cache = new Cache<string, int>();
             Assert.False(cache.Contains("a"));
-            Assert.Throws<KeyNotFoundException>(delegate() {
+            Assert.Throws<KeyNotFoundException>(delegate () {
                 cache.Get("a");
             });
 
@@ -56,7 +56,7 @@ namespace LimeBean.Tests {
             var cache = new Cache<string, int>();
             cache.Put("a", 1);
             cache.Put("b", 2);
-            cache.Put("c", 3);            
+            cache.Put("c", 3);
 
             cache.Capacity = 2;
             cache.Put("a", 10);

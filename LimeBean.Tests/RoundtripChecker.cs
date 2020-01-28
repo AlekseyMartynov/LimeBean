@@ -16,7 +16,7 @@ namespace LimeBean.Tests {
         }
 
         public void Check(object before, object after) {
-            var id = _storage.Store("foo", new Dictionary<string, object> { 
+            var id = _storage.Store("foo", new Dictionary<string, object> {
                     { "p", before }
                 });
 
@@ -28,7 +28,7 @@ namespace LimeBean.Tests {
                     Assert.Equal(after.GetType(), loaded["p"].GetType());
             } finally {
                 _db.Exec("drop table foo");
-                _storage.InvalidateSchema();            
+                _storage.InvalidateSchema();
             }
         }
 

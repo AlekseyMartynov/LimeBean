@@ -7,7 +7,7 @@ using System.Text;
 namespace LimeBean.Tests.Examples {
 
     public class AutoGuidKeys {
-        
+
         public void Scenario() {
             using(var api = new BeanApi("data source=:memory:", SQLiteFactory.Instance)) {
                 api.EnterFluidMode();
@@ -28,7 +28,7 @@ namespace LimeBean.Tests.Examples {
             }
 
             static string GenerateGuid() {
-                // NOTE 
+                // NOTE
                 // Guid primary keys can be more complicated than you expect
                 // See http://codeproject.com/articles/388157/
 

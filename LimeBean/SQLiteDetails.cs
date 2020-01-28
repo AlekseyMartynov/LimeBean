@@ -35,7 +35,7 @@ namespace LimeBean {
             return CommonDatabaseDetails.QuoteWithBackticks(name);
         }
 
-        public void ExecInitCommands(IDatabaseAccess db) {            
+        public void ExecInitCommands(IDatabaseAccess db) {
         }
 
         public object ExecInsert(IDatabaseAccess db, string tableName, string autoIncrementName, IDictionary<string, object> data) {
@@ -109,7 +109,7 @@ namespace LimeBean {
         }
 
         public bool IsReadOnlyCommand(string text) {
-            return Regex.IsMatch(text, @"^\s*(select\W|pragma table_info)", RegexOptions.IgnoreCase);            
+            return Regex.IsMatch(text, @"^\s*(select\W|pragma table_info)", RegexOptions.IgnoreCase);
         }
     }
 

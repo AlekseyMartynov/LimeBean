@@ -9,7 +9,7 @@ namespace LimeBean {
         IDictionary<string, bool> _autoIncrements = new Dictionary<string, bool>();
 
         public string DefaultName = "id";
-        public bool DefaultAutoIncrement = true;        
+        public bool DefaultAutoIncrement = true;
 
         public bool IsAutoIncrement(string kind) {
             return _autoIncrements.GetSafe(kind, GetKeyNames(kind).Count > 1 ? false : DefaultAutoIncrement);
@@ -22,7 +22,7 @@ namespace LimeBean {
         public object GetKey(string kind, IDictionary<string, object> data) {
             var keyNames = GetKeyNames(kind);
 
-            if(keyNames.Count  > 1) {
+            if(keyNames.Count > 1) {
                 var key = new CompoundKey();
                 foreach(var name in keyNames)
                     key[name] = data.GetSafe(name);

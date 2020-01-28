@@ -17,7 +17,7 @@ namespace LimeBean.Tests {
             _conn = new SQLiteConnection("data source=:memory:");
             _conn.Open();
 
-            IDatabaseDetails details = new SQLiteDetails();           
+            IDatabaseDetails details = new SQLiteDetails();
             IDatabaseAccess db = new DatabaseAccess(_conn, details);
             IKeyAccess keys = new KeyUtil();
             IStorage storage = new DatabaseStorage(details, db, keys);
@@ -34,7 +34,7 @@ namespace LimeBean.Tests {
         }
 
         public void Dispose() {
-            _conn.Dispose();        
+            _conn.Dispose();
         }
 
         [Fact]
@@ -112,7 +112,7 @@ namespace LimeBean.Tests {
             Assert.Equal(3, queryCount);
         }
 
-        
+
         class Foo : Bean {
             public Foo()
                 : base("foo") {

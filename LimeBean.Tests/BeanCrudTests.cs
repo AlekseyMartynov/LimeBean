@@ -100,7 +100,7 @@ namespace LimeBean.Tests {
             var observer = new TracingObserver();
             crud.AddObserver(observer);
 
-            var bean = crud.RowToBean<Tracer>(new Dictionary<string, object> { 
+            var bean = crud.RowToBean<Tracer>(new Dictionary<string, object> {
                 { "s", "hello" }
             });
 
@@ -111,7 +111,7 @@ namespace LimeBean.Tests {
 
             observer.TraceLog = "";
 
-            bean = crud.RowToBean<Tracer>(new Dictionary<string, object> { 
+            bean = crud.RowToBean<Tracer>(new Dictionary<string, object> {
                 { "id", 123 },
                 { "s", "see you" }
             });
@@ -127,12 +127,12 @@ namespace LimeBean.Tests {
         [Fact]
         public void PreventDirectInstantiation() {
             var crud = new BeanCrud(null, null, null);
-            
-            Assert.Throws<InvalidOperationException>(delegate() {
-                crud.Store(new Tracer());    
+
+            Assert.Throws<InvalidOperationException>(delegate () {
+                crud.Store(new Tracer());
             });
 
-            Assert.Throws<InvalidOperationException>(delegate() {
+            Assert.Throws<InvalidOperationException>(delegate () {
                 crud.Trash(new Tracer());
             });
         }
@@ -179,7 +179,7 @@ namespace LimeBean.Tests {
             protected internal override void AfterTrash() {
                 Trace("at");
             }
-        
+
         }
     }
 

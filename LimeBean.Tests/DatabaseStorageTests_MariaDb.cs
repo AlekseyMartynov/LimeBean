@@ -39,7 +39,7 @@ namespace LimeBean.Tests {
                 ti1 TinyInt(123),
                 ti2 TINYINT,
                 ti3 bool,
-                ti4 Boolean, 
+                ti4 Boolean,
 
                 i1  integer(123),
                 i2  Integer,
@@ -185,7 +185,7 @@ namespace LimeBean.Tests {
 
         [Fact]
         public void Roundtrip() {
-            AssertExtensions.WithCulture("ru", delegate() {
+            AssertExtensions.WithCulture("ru", delegate () {
                 _storage.EnterFluidMode();
                 var checker = new RoundtripChecker(_db, _storage);
 
@@ -206,7 +206,7 @@ namespace LimeBean.Tests {
                 SharedChecks.CheckBigNumberRoundtripForcesString(checker);
                 checker.Check(SharedChecks.SAMPLE_GUID, SharedChecks.SAMPLE_GUID.ToString());
 
-                // bool            
+                // bool
                 checker.Check(true, (sbyte)1);
                 checker.Check(false, (sbyte)0);
 

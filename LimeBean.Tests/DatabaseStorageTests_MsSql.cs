@@ -161,7 +161,7 @@ namespace LimeBean.Tests {
 
         [Fact]
         public void Roundtrip() {
-            AssertExtensions.WithCulture("ru", delegate() {
+            AssertExtensions.WithCulture("ru", delegate () {
                 _storage.EnterFluidMode();
                 var checker = new RoundtripChecker(_db, _storage);
 
@@ -191,7 +191,7 @@ namespace LimeBean.Tests {
                 // conversion to string
                 SharedChecks.CheckBigNumberRoundtripForcesString(checker);
 
-                // bool            
+                // bool
                 checker.Check(true, (byte)1);
                 checker.Check(false, (byte)0);
 
@@ -232,7 +232,7 @@ namespace LimeBean.Tests {
 
         [Fact]
         public void CustomRank_ExistingColumn() {
-            _db.Exec("create table foo(id int, p smallmoney)");                       
+            _db.Exec("create table foo(id int, p smallmoney)");
             _storage.Store("foo", SharedChecks.MakeRow("p", new SqlMoney(9.9)));
             Assert.Equal(9.900M, _db.Cell<object>(false, "select p from foo"));
         }

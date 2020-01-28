@@ -6,7 +6,7 @@ using System.Text;
 namespace LimeBean {
 
     static class CommonDatabaseDetails {
-        public const int 
+        public const int
             RANK_NULL = Int32.MinValue,
             RANK_STATIC_BASE = 100,
             RANK_CUSTOM = Int32.MaxValue;
@@ -30,7 +30,7 @@ namespace LimeBean {
                 colSpecs.Add(details.QuoteName(autoIncrementName) + " " + details.AutoIncrementSqlType);
 
             foreach(var pair in columns)
-                colSpecs.Add(details.QuoteName(pair.Key) + " " + details.GetSqlTypeFromRank(pair.Value));            
+                colSpecs.Add(details.QuoteName(pair.Key) + " " + details.GetSqlTypeFromRank(pair.Value));
 
             sql
                 .Append(String.Join(", ", colSpecs))
@@ -54,7 +54,7 @@ namespace LimeBean {
                     .Append(String.Join(", ", fieldNames.Select(details.QuoteName)))
                     .Append(") ");
             }
-                
+
             if(!String.IsNullOrEmpty(valuesPrefix))
                 builder.Append(valuesPrefix).Append(" ");
 

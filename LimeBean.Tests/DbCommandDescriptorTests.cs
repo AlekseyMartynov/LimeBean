@@ -27,7 +27,7 @@ namespace LimeBean.Tests {
             var cmd2 = new DbCommandDescriptor("b");
 
             Assert.NotEqual(cmd1, cmd2);
-            Assert.False(cmd1.Equals((object)cmd2));            
+            Assert.False(cmd1.Equals((object)cmd2));
         }
 
         [Fact]
@@ -79,7 +79,7 @@ namespace LimeBean.Tests {
             var dict = new Hashtable();
             dict[cmd1] = "ok";
 
-            Assert.Equal("ok", dict[cmd2]);        
+            Assert.Equal("ok", dict[cmd2]);
         }
 
     }

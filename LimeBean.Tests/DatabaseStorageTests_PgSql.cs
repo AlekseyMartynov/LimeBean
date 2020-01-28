@@ -41,7 +41,7 @@ namespace LimeBean.Tests {
                 d   DOUBLE precision,
                 n   Numeric,
                 t   text,
-                ts  timestamp,                
+                ts  timestamp,
                 tz  timestamptz,
                 g   uuid,
                 bl  bytea,
@@ -138,7 +138,7 @@ namespace LimeBean.Tests {
                 { "p1", true },
                 { "p2", 1 },
                 { "p3", 1 + (long)Int32.MaxValue },
-                { "p4", 3.14 }, 
+                { "p4", 3.14 },
                 { "p5", Decimal.MaxValue },
                 { "p6", "abc" }
             };
@@ -167,7 +167,7 @@ namespace LimeBean.Tests {
             _db.Exec("create table foo(id serial, p bool)");
             _db.Exec("insert into foo (p) values (null)");
             _db.Exec("insert into foo (p) values (false)");
-            _db.Exec("insert into foo (p) values (true)");            
+            _db.Exec("insert into foo (p) values (true)");
 
             _storage.EnterFluidMode();
             _storage.Store("foo", new Dictionary<string, object> { { "p", 2 } });
@@ -183,7 +183,7 @@ namespace LimeBean.Tests {
 
         [Fact]
         public void Roundtrip() {
-            AssertExtensions.WithCulture("ru", delegate() {
+            AssertExtensions.WithCulture("ru", delegate () {
                 _storage.EnterFluidMode();
                 var checker = new RoundtripChecker(_db, _storage);
 
@@ -201,7 +201,7 @@ namespace LimeBean.Tests {
 
                 // https://github.com/npgsql/npgsql/issues/11
                 checker.Check(
-                    SharedChecks.SAMPLE_DATETIME_OFFSET, 
+                    SharedChecks.SAMPLE_DATETIME_OFFSET,
                     SharedChecks.SAMPLE_DATETIME_OFFSET.ToLocalTime().DateTime
                 );
 

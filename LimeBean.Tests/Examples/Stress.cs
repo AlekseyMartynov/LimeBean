@@ -12,7 +12,7 @@ namespace LimeBean.Tests.Examples {
         Random _rand = new Random();
 
         public Stress() {
-            R = new BeanApi("data source=" + DB_PATH, SQLiteFactory.Instance);            
+            R = new BeanApi("data source=" + DB_PATH, SQLiteFactory.Instance);
         }
 
         public void Dispose() {
@@ -24,7 +24,7 @@ namespace LimeBean.Tests.Examples {
             R.Exec("drop table if exists foo");
             R.EnterFluidMode();
 
-            R.Transaction(delegate() {
+            R.Transaction(delegate () {
                 for(var i = 0; i < 10 * 1000; i++) {
                     var bean = R.Dispense("foo");
                     for(var c = 0; c < 12; c++)
@@ -39,7 +39,7 @@ namespace LimeBean.Tests.Examples {
             foreach(var bean in R.FindIterator("foo")) {
                 var id = bean["id"];
                 // Console.WriteLine(id);
-            }        
+            }
         }
 
 

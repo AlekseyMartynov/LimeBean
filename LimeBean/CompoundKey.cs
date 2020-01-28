@@ -15,14 +15,14 @@ namespace LimeBean {
                 if(value == null)
                     throw new ArgumentNullException(component);
 
-                _components[component] = value; 
+                _components[component] = value;
             }
         }
 
-        public override string ToString() {            
+        public override string ToString() {
             return String.Join(", ", _components.OrderBy(e => e.Key).Select(c => c.Key + "=" + Convert.ToString(c.Value, CultureInfo.InvariantCulture)));
         }
-    
+
     }
 
 }

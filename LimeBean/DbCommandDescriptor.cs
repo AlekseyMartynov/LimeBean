@@ -8,7 +8,7 @@ namespace LimeBean {
     struct DbCommandDescriptor : IEquatable<DbCommandDescriptor> {
         public readonly int Tag;
         public readonly string Sql;
-        public readonly object[] Parameters;        
+        public readonly object[] Parameters;
 
         public DbCommandDescriptor(string sql, params object[] parameters)
             : this(0, sql, parameters) {

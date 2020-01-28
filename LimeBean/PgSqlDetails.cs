@@ -62,7 +62,7 @@ namespace LimeBean {
                 return db.Cell<object>(false, sql, values);
 
             db.Exec(sql, values);
-            return null;            
+            return null;
         }
 
         public string GetCreateTableStatementPostfix() {

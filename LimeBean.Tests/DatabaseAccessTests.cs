@@ -23,7 +23,7 @@ namespace LimeBean.Tests {
         }
 
         public void Dispose() {
-            _conn.Dispose();        
+            _conn.Dispose();
         }
 
         [Fact]
@@ -33,7 +33,7 @@ namespace LimeBean.Tests {
 
         [Fact]
         public void Caching_EnableDisable() {
-            var readers = new Func<string, object>[] { 
+            var readers = new Func<string, object>[] {
                 sql => _db.Cell<string>(true, sql),
                 sql => _db.Col<string>(true, sql)[0],
                 sql => _db.Row(true, sql)["r"],
@@ -54,19 +54,19 @@ namespace LimeBean.Tests {
         public void Caching_SameQueriesDifferByFetchType() {
             var sql = "select 1";
 
-            Assert.Null(Record.Exception(delegate() {
+            Assert.Null(Record.Exception(delegate () {
                 _db.Col<int>(true, sql);
                 _db.Cell<int>(true, sql);
                 _db.Row(true, sql);
                 _db.Rows(true, sql);
                 _db.Exec(sql);
                 _db.ColIterator<int>(sql).Last();
-                _db.RowsIterator(sql).Last();            
+                _db.RowsIterator(sql).Last();
             }));
         }
 
         [Fact]
-        public void Caching_InvalidateByUpdate() {            
+        public void Caching_InvalidateByUpdate() {
             _db.Exec("create table t1(a)");
             _db.Exec("insert into t1(a) values(42)");
             _db.Cell<int>(true, "select a from t1");
@@ -101,7 +101,7 @@ namespace LimeBean.Tests {
             // renew oldest entry: 1, 2, 0
             _db.Row(true, sql, 0);
             Assert.Equal(3, queryCount);
-        
+
             // trim: 2, 0, 9
             _db.Row(true, sql, 9);
             Assert.Equal(4, queryCount);
@@ -118,15 +118,15 @@ namespace LimeBean.Tests {
         public void Transactions() {
             _db.Exec("create table t(c)");
 
-            _db.Transaction(delegate() {
+            _db.Transaction(delegate () {
                 _db.Exec("insert into t(c) values(1)");
                 return false;
             });
 
             Assert.Equal(0, _db.Cell<int>(true, "select count(*) from t"));
 
-            Assert.Throws<Exception>(delegate() {
-                _db.Transaction(delegate() {
+            Assert.Throws<Exception>(delegate () {
+                _db.Transaction(delegate () {
                     _db.Exec("insert into t(c) values(1)");
                     throw new Exception();
                 });
@@ -134,7 +134,7 @@ namespace LimeBean.Tests {
 
             Assert.Equal(0, _db.Cell<int>(true, "select count(*) from t"));
 
-            _db.Transaction(delegate() {
+            _db.Transaction(delegate () {
                 _db.Exec("insert into t(c) values(1)");
                 return true;
             });
@@ -146,22 +146,22 @@ namespace LimeBean.Tests {
         public void InTransaction() {
             Assert.False(_db.InTransaction);
 
-            _db.Transaction(delegate() {
+            _db.Transaction(delegate () {
                 Assert.True(_db.InTransaction);
                 return true;
             });
 
-            _db.Transaction(delegate() {
+            _db.Transaction(delegate () {
                 return false;
             });
 
             Assert.False(_db.InTransaction);
 
             try {
-                _db.Transaction(delegate() {
+                _db.Transaction(delegate () {
                     throw new Exception();
                 });
-            } catch { 
+            } catch {
             }
 
             Assert.False(_db.InTransaction);
@@ -172,7 +172,7 @@ namespace LimeBean.Tests {
             _db.Exec("create table foo(x)");
             _db.Exec("insert into foo(x) values(1)");
 
-            _db.Transaction(delegate() {
+            _db.Transaction(delegate () {
                 _db.Exec("update foo set x=2");
                 _db.Cell<int>(true, "select x from foo");
                 return false;
@@ -187,7 +187,7 @@ namespace LimeBean.Tests {
 
             _db.QueryExecuting += cmd => trace.Add(cmd.Transaction);
 
-            _db.Transaction(delegate() {
+            _db.Transaction(delegate () {
                 _db.Exec("select 1");
                 return true;
             });

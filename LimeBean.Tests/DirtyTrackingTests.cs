@@ -53,7 +53,7 @@ namespace LimeBean.Tests {
             _bean["a"] = "bean change";
             _api.Exec("update foo set b='external change'");
             _api.Store(_bean);
-            Assert.Equal("initial", _api.Cell<string>("select b from foo"));        
+            Assert.Equal("initial", _api.Cell<string>("select b from foo"));
         }
 
         public void Dispose() {

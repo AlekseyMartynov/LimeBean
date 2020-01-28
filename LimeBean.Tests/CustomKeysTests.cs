@@ -15,7 +15,7 @@ namespace LimeBean.Tests {
         }
 
         public void Dispose() {
-            _api.Dispose();        
+            _api.Dispose();
         }
 
         [Fact]
@@ -38,13 +38,13 @@ namespace LimeBean.Tests {
             Assert.Equal("value2", bean["prop"]);
 
             _api.Trash(bean);
-            Assert.Equal(0, _api.Count("foo"));  
+            Assert.Equal(0, _api.Count("foo"));
         }
 
         [Fact]
         public void Assigned_Null() {
             _api.Key("foo", "any", false);
-            Assert.Throws<InvalidOperationException>(delegate() {                
+            Assert.Throws<InvalidOperationException>(delegate () {
                 _api.Store(_api.Dispense("foo"));
             });
         }
@@ -89,7 +89,7 @@ namespace LimeBean.Tests {
             Assert.Equal("value2", bean["prop"]);
 
             _api.Trash(bean);
-            Assert.Equal(0, _api.Count("foo"));        
+            Assert.Equal(0, _api.Count("foo"));
         }
 
         [Fact]
@@ -132,14 +132,14 @@ namespace LimeBean.Tests {
             var bean = _api.Dispense("foo");
             bean["k1"] = 1;
 
-            Assert.Throws<ArgumentNullException>(delegate() {
+            Assert.Throws<ArgumentNullException>(delegate () {
                 _api.Store(bean);
             });
         }
 
         [Fact]
         public void AssignedCompound_Empty() {
-            Assert.Throws<ArgumentException>(delegate() {
+            Assert.Throws<ArgumentException>(delegate () {
                 _api.Key("foo");
             });
         }

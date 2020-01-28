@@ -37,7 +37,7 @@ namespace LimeBean.Tests.Fixtures {
 
             Exec(Connection, "set sql_mode=STRICT_TRANS_TABLES");
             Exec(Connection, "create database " + _dbName);
-            Exec(Connection, "use " + _dbName);            
+            Exec(Connection, "use " + _dbName);
         }
 
         public override void TearDownDatabase() {
