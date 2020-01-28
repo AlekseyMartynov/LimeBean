@@ -1,6 +1,3 @@
-*.suo
-*.*proj.user
-bin/
-obj/
-packages/
-.nuget/NuGet.exe
+.vs
+bin
+obj

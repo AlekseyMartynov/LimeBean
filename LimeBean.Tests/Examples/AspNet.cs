@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !NETCOREAPP
+using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
@@ -34,3 +35,4 @@ namespace LimeBean.Tests.Examples.AspNet {
     }
 
 }
+#endif

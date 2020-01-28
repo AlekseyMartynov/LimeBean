@@ -1,15 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LimeBean", "LimeBean\LimeBean.csproj", "{7499BFB8-59D8-4784-82E3-A75963DD8CA5}"
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LimeBean", "LimeBean\LimeBean.csproj", "{7499BFB8-59D8-4784-82E3-A75963DD8CA5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LimeBean.Tests", "LimeBean.Tests\LimeBean.Tests.csproj", "{9B7B480E-7032-45AD-BA54-C337FCB5C877}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{1732C13C-9A52-4DC3-BED4-4DC7F12CAA42}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LimeBean.Tests", "LimeBean.Tests\LimeBean.Tests.csproj", "{9B7B480E-7032-45AD-BA54-C337FCB5C877}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,5 +24,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {47686E0C-64DD-436B-85A2-A05089A5137F}
 	EndGlobalSection
 EndGlobal
